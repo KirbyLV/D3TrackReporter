@@ -12,5 +12,5 @@ In App.vue, on line 7, change the fallback IP to the IP address of the D3 Direct
 From the "D3TrackReporter" folder, run 'npm run dev'
 
 ## Requirements
--This folder should contain all the requirements
+-This folder should contain all the requirements.  
 -May need to run 'npm install'
