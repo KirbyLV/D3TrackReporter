@@ -7,7 +7,7 @@ This runs a web server with a websocket connection to a Disguise director and re
 This is designed to run on a separate system with a network connection to the D3 Director
 
 ## To Use
-In App.vue, on line 7, change the fallback IP to the IP address of the D3 Director
+In /src/App.vue, on line 7, change the fallback IP to the IP address of the D3 Director
 
 From the "D3TrackReporter" folder, run 'npm run dev'
 
