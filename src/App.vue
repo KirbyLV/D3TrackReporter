@@ -1,7 +1,7 @@
 <script setup>
 import { LiveUpdateOverlay, useLiveUpdate } from '@disguise-one/vue-liveupdate'
+import CurrentVideoAssets from './components/CurrentVideoAssets.vue'
 import TrackDetail from './components/TrackDetail.vue'
-import VideoAssets from './components/VideoAssets.vue'
 
 // Extract the director endpoint from the URL query parameters
 const urlParams = new URLSearchParams(window.location.search)
@@ -15,7 +15,7 @@ const liveUpdate = useLiveUpdate(directorEndpoint)
   <div class="app">
     <h1>CT Disguise Monitoring</h1>
 
-    <VideoAssets :liveUpdate="liveUpdate" />
+    <CurrentVideoAssets :liveUpdate="liveUpdate" />
 
     <TrackDetail :liveUpdate="liveUpdate" />
 

@@ -2,10 +2,10 @@
     <div class="assets-section">
         <h2>Local Transport Manager</h2>
         <h3>Running Video assets</h3>
-        <div class="assets-value">Active Layer count: {{ activeLayerCount }}</div>
-        <div>
+        <div class="assets-header">Active Layers playing: {{ activeLayerCount }}</div>
+        <div class="assets-list">
             <ul>
-                <li v-for="item in layerClips" :key="item.layer">
+                <li v-for="item in layerReported" :key="item.layer">
                     <span class="layer-name">{{ item.layer }}</span>
                     <span class="separator">:</span>
                     <span class="path-name">{{ item.path }}</span>
@@ -101,7 +101,7 @@
         })
     })
 
-    const layerClips = computed(() => {
+    const layerReported = computed(() => {
         return layerNames.value.map((layer, i) => ({
             layer: layer.name,
             path: videoAssetList.value[i]?.path || '(No path)',
@@ -125,8 +125,12 @@
         border: 1px solid #ccc;
         border-radius: 4px;
     }
-
-    .assets-value {
+    .assets-list {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        text-align: left;
+    }
+    .assets-header {
         font-size: 1.2rem;
         font-weight: bold;
     }
