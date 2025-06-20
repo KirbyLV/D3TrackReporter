@@ -1,10 +1,11 @@
 <script setup>
-import VideoAssets from './components/VideoAssets.vue'
-import { useLiveUpdate, LiveUpdateOverlay } from '@disguise-one/vue-liveupdate'
+import { LiveUpdateOverlay, useLiveUpdate } from '@disguise-one/vue-liveupdate'
+import CurrentVideoAssets from './components/CurrentVideoAssets.vue'
+import TrackDetail from './components/TrackDetail.vue'
 
 // Extract the director endpoint from the URL query parameters
 const urlParams = new URLSearchParams(window.location.search)
-const directorEndpoint = urlParams.get('director') || '172.16.16.230:80' // Fallback for development
+const directorEndpoint = urlParams.get('director') || '192.168.1.201:80' // Fallback for development
 
 // Initialize the live update composable for the overlay
 const liveUpdate = useLiveUpdate(directorEndpoint)
@@ -14,7 +15,9 @@ const liveUpdate = useLiveUpdate(directorEndpoint)
   <div class="app">
     <h1>CT Disguise Monitoring</h1>
 
-    <VideoAssets :liveUpdate="liveUpdate" />
+    <CurrentVideoAssets :liveUpdate="liveUpdate" />
+
+    <TrackDetail :liveUpdate="liveUpdate" />
 
     <LiveUpdateOverlay :liveUpdate="liveUpdate" />
 
@@ -32,10 +35,7 @@ const liveUpdate = useLiveUpdate(directorEndpoint)
   transition: filter 300ms;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+  filter: drop-shadow(0 0 2em #e8c442d3);
 }
 .app {
   max-width: 800px;
