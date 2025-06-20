@@ -91,7 +91,8 @@
             let path = '(No path)';
             if (Array.isArray(raw) && raw.length > 0) {
                 const fullPath = raw[0]?.r?.path ?? '';
-                path = fullPath.replace(/^objects\/videoclip\//, '');
+                const pathNoTail = fullPath.replace(/\.apx$/, '');
+                path = pathNoTail.replace(/^objects\/videoclip\//, '');
             }
 
             return {

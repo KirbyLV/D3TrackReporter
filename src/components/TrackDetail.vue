@@ -103,7 +103,8 @@ import { computed, ref, watch } from 'vue';
             let assetPath = '(No Asset)';
             if (Array.isArray(raw) && raw.length >0) {
                 const fullAssetPath = raw[0]?.r?.path ?? '';
-                assetPath = fullAssetPath.replace(/^objects\/videoclip\//, '');
+                const pathNoApxTail = fullAssetPath.replace(/\.apx$/, '');
+                assetPath = pathNoApxTail.replace(/^objects\/videoclip\//, '');
             }
 
             return {
