@@ -14,5 +14,5 @@ From the "D3TrackReporter" folder, run 'npm run dev'
 ## Requirements
 -python  
 -node.js + npm  
--This folder should contain all other requirements 
+-This folder should contain all other requirements  
 -May need to run 'npm install'
