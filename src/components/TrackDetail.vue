@@ -3,22 +3,26 @@
         <h2>Track Details</h2>
         <div class="big-bold">Current Track: {{ currentTrackName }}</div>
         <div class="big-bold">Layers present in timeline: {{ layerCount }}</div>
-        <table class="track-table">
-            <thead>
-                <tr>
-                    <th>Start Time</th>
-                    <th>Layer Name</th>
-                    <th>Video Asset</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(track, index) in allTracksSorted" :key="track.trackLayer">
-                    <td class="start-time">{{ track.startTime }}</td>
-                    <td class="layer-name">{{ track.trackLayer }}</td>
-                    <td class="video-path">{{ track.videoAsset }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <details open style="margin-top: 20px;">
+            <summary style="cursor: pointer; font-weight: bold;">Layer & Asset Table <span class="notation">(click to collapse)</span></summary>
+            <table class="track-table">
+                <thead>
+                    <tr>
+                        <th>Start Time</th>
+                        <th>Layer Name</th>
+                        <th>Video Asset</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(track, index) in allTracksSorted" :key="track.trackLayer">
+                        <td class="start-time">{{ track.startTime }}</td>
+                        <td class="layer-name">{{ track.trackLayer }}</td>
+                        <td class="video-path">{{ track.videoAsset }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <button @click="exportTableToCSV">Export to CSV</button>
+        </details>
     </div>
 </template>
 
@@ -158,6 +162,25 @@ import { computed, ref, watch } from 'vue';
     const allTracksSorted = computed(() => {
         return [...allTracksReported.value].sort((a, b) => a.startTimeSeconds - b.startTimeSeconds)
         });
+
+    function exportTableToCSV() {
+        const rows = [
+            ['Start Time', 'Layer Name', 'Video Asset'],
+            ...allTracksSorted.value.map(track => [
+                track.startTime,
+                track.trackLayer,
+                track.videoAsset
+            ])
+        ]
+
+        const csvContent = rows.map(e => e.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'track_details.csv');
+        link.click();
+    }
 </script>
 
 <style scoped>
@@ -206,6 +229,11 @@ import { computed, ref, watch } from 'vue';
 
     .start-time {
         color: #6a5acd;
+    }
+    .notation {
+        font-style: italic;
+        font-size: 0.8rem;
+        font-weight: lighter;
     }
 
 </style>
