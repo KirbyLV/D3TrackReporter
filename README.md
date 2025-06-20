@@ -15,4 +15,4 @@ From the "D3TrackReporter" folder, run 'npm run dev'
 -python  
 -node.js + npm  
 -This folder should contain all other requirements  
--May need to run 'npm install'
+-navigate to the folder for D3TrackReporter and run `npm install` to install vite
