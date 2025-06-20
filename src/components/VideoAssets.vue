@@ -1,6 +1,7 @@
 <template>
     <div class="assets-section">
-        <h2>Running Video assets</h2>
+        <h2>Local Transport Manager</h2>
+        <h3>Running Video assets</h3>
         <div class="assets-value">Active Layer count: {{ activeLayerCount }}</div>
         <div>
             <ul>
@@ -15,7 +16,7 @@
 </template>
 
 <script setup>
-    import { ref, watch, computed } from 'vue'
+    import { computed, ref, watch } from 'vue';
     const props = defineProps({
         liveUpdate: {
             type: Object,
@@ -107,7 +108,7 @@
         }));
     })
 
-    console.log('videoAssetData snapshot:', videoAssetData)
+    // console.log('videoAssetData snapshot:', videoAssetData)
 
     /*
     <!-- The raw subscription value for the video file names in a specific layer, For debugging -->
