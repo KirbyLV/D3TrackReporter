@@ -23,7 +23,7 @@
                     </tr>
                 </tbody>
             </table>
-            <button @click="exportTableToCSV">Export to CSV</button>
+            <button class="button-blue" @click="exportTableToCSV">Export to CSV</button>
         </details>
     </div>
 </template>
@@ -280,5 +280,25 @@ import { useLiveUpdateStore } from '../stores/liveUpdateStore';
     .active-row {
         background-color: #ff8af95f;
         font-weight: bold;
+    }
+    .button-blue {
+        box-shadow:inset 0px 1px 0px 0px #8e8ef5;
+        background:linear-gradient(to bottom, #379bf2 5%, #271fc6 100%);
+        background-color:#373df2;
+        border-radius:6px;
+        border:1px solid #2118d0;
+        display:inline-block;
+        cursor:pointer;
+        color:#ffffff;
+        font-family:Arial;
+        font-size:15px;
+        font-weight:bold;
+        padding:6px 24px;
+        text-decoration:none;
+        text-shadow:0px 1px 0px #810e05;
+    }
+    .button-blue:hover {
+        background:linear-gradient(to bottom, #271fc6 5%, #379bf2 100%);
+        background-color:#131388;
     }
 </style>
