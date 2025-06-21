@@ -11,13 +11,15 @@
                         <th>Start Time</th>
                         <th>Layer Name</th>
                         <th>Video Asset</th>
+                        <th>End Time</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(track, index) in allTracksSorted" :key="track.trackLayer">
+                    <tr v-for="(track, index) in allTracksSorted" :key="track.trackLayer" :class="{ 'active-row': isActiveRow(track)}">
                         <td class="start-time">{{ track.startTime }}</td>
                         <td class="layer-name">{{ track.trackLayer }}</td>
                         <td class="video-path">{{ track.videoAsset }}</td>
+                        <td class="start-time">{{ track.endTime }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -28,6 +30,10 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
+import { useLiveUpdateStore } from '../stores/liveUpdateStore';
+    // Access current playhead from global pinia variable
+    const store = useLiveUpdateStore();
+
     const props = defineProps({
         liveUpdate: {
             type: Object,
@@ -141,6 +147,33 @@ import { computed, ref, watch } from 'vue';
             }
         });
     });
+    //Getting track layer end times
+    const layerEndTimeData = ref({});
+    watch(
+        () => layerCount.value,
+        (count) => {
+            if (!count) return;
+            const endTimeSubscriptions = {};
+            for (let i = 0; i < count; i++) {
+                endTimeSubscriptions[`endTime${i}`] = `object.track.layers[${i}].tEnd`;
+            }
+            // console.log('Layer End Time Subscriptions:', endTimeSubscriptions);
+
+            layerEndTimeData.value = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', endTimeSubscriptions);
+        },
+        { immediate: true }
+    );
+    const allLayerEndTimes = computed(() => {
+        if (!layerEndTimeData.value) return [];
+
+        return Object.entries(layerEndTimeData.value).map(([key, refValue]) => {
+            const raw = refValue?.value ?? refValue;
+            return {
+                id: key,
+                endTime: typeof raw === 'number' ? raw.toFixed(2) : 0
+            }
+        });
+    });
 
     function formatTime(seconds) {
         if (typeof seconds !== 'number' || isNaN(seconds)) return '(No Time)';
@@ -156,7 +189,9 @@ import { computed, ref, watch } from 'vue';
             trackLayer: trackLayer.name,
             videoAsset: allTrackVideoAssets.value[i]?.assetPath || '(No Asset)',
             startTimeSeconds: Number(allLayerStartTimes.value[i]?.startTime) || 0,
-            startTime: formatTime(Number(allLayerStartTimes.value[i]?.startTime)) || '(No Time)'
+            startTime: formatTime(Number(allLayerStartTimes.value[i]?.startTime)) || '(No Time)',
+            endTimeSeconds: Number(allLayerEndTimes.value[i]?.endTime) || 0,
+            endTime: formatTime(Number(allLayerEndTimes.value[i]?.endTime)) || '(No Time)',
         }))
     })
 
@@ -181,6 +216,12 @@ import { computed, ref, watch } from 'vue';
         link.setAttribute('href', url);
         link.setAttribute('download', 'track_details.csv');
         link.click();
+    }
+
+    // Checking playhead position from global store against track start and end times
+    function isActiveRow(row) {
+        const playhead = store.currentPlayhead
+        return playhead >= row.startTimeSeconds && playhead <= row.endTimeSeconds;
     }
 </script>
 
@@ -236,5 +277,8 @@ import { computed, ref, watch } from 'vue';
         font-size: 0.8rem;
         font-weight: lighter;
     }
-
+    .active-row {
+        background-color: #ff8af95f;
+        font-weight: bold;
+    }
 </style>

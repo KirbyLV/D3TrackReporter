@@ -7,7 +7,8 @@ import TrackDetail from '../components/TrackDetail.vue'
 const routes = [
     { path: '/track-detail', name: 'TrackDetail', component: TrackDetail },
     { path: '/play-logger', name: 'PlayLogger', component: PlayLogger },
-    { path: '/current-video-assets', name: 'CurrentVideoAssets', component: CurrentVideoAssets }
+    { path: '/current-video-assets', name: 'CurrentVideoAssets', component: CurrentVideoAssets },
+    {path: '/', redirect: '/current-video-assets'}
 ]
 
 const router = createRouter({

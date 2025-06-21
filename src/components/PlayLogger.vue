@@ -1,9 +1,11 @@
 <template>
     <div class="logger-section">
         <h2>Played Asset Log</h2>
-        <div class="assets-header">Assets will appear below as they are played</div>
+        <div class="assets-header">Assets will appear below at the start of each clip</div>
+        <div class="warn">This window must be active to continue logging</div>
+            
         <div style="margin: 1em 0;">
-            <button @click="isLogging = !isLogging">
+            <button :class="isLogging ? 'logging-button-red' : 'logging-button-green'" @click="isLogging = !isLogging">
                 {{  isLogging ? 'Stop Logging' : 'Start Logging' }}
             </button>
         </div>
@@ -30,7 +32,9 @@
                     </tr>
                 </tfoot>
             </table>
-            <button @click="exportLogToCSV">Export Log to CSV</button>
+            <button class="button-blue" @click="exportLogToCSV">Export Log to CSV</button>
+            <button class="logging-button-red" @click="confirmClearLog">Clear Log</button>
+            <p class="notation">Note: The log will only record assets played while logging is enabled.</p>
         </details>
     </div>
 </template>
@@ -164,6 +168,16 @@
         link.setAttribute('download', 'play_log.csv');
         link.click();
     }
+
+    //Functions to clear the play log with confirmation
+    function confirmClearLog() {
+        if (confirm('Are you sure you want to clear the play log? This action cannot be undone.')) {
+            clearPlayLog();
+        }
+    }
+    function clearPlayLog() {
+        playLog.value = [];
+    }
 </script>
 
 <style scoped>
@@ -172,6 +186,74 @@
         padding: 1rem;
         border: 1px solid #ccc;
         border-radius: 4px;
+    }
+    .logging-button-green {
+        box-shadow: 0px 10px 14px -7px #3e7327;
+        background:linear-gradient(to bottom, #77b55a 5%, #72b352 100%);
+        background-color:#77b55a;
+        border-radius:6px;
+        border:1px solid #4b8f29;
+        display:inline-block;
+        cursor:pointer;
+        color:#ffffff;
+        font-family:Arial;
+        font-size:15px;
+        font-weight:bold;
+        padding:6px 24px;
+        text-decoration:none;
+        text-shadow:0px 1px 0px #5b8a3c;
+    }
+    .logging-button-green:hover {
+        background:linear-gradient(to bottom, #72b352 5%, #77b55a 100%);
+        background-color:#2f5a1a;
+    }
+    .logging-button-green:active {
+        position:relative;
+        top:1px;
+    }
+    .logging-button-red {
+        box-shadow:inset 0px 1px 0px 0px #f5978e;
+        background:linear-gradient(to bottom, #ef4d42 5%, #ca2719 100%);
+        background-color:#f24537;
+        border-radius:6px;
+        border:1px solid #d02718;
+        display:inline-block;
+        cursor:pointer;
+        color:#ffffff;
+        font-family:Arial;
+        font-size:15px;
+        font-weight:bold;
+        padding:6px 24px;
+        text-decoration:none;
+        text-shadow:0px 1px 0px #810e05;
+    }
+    .logging-button-red:hover {
+        background:linear-gradient(to bottom, #c62d1f 5%, #f24537 100%);
+        background-color:#8e1c13;
+    }
+    .logging-button-red:active {
+        position:relative;
+        top:1px;
+    }
+    .button-blue {
+        box-shadow:inset 0px 1px 0px 0px #8e8ef5;
+        background:linear-gradient(to bottom, #379bf2 5%, #271fc6 100%);
+        background-color:#373df2;
+        border-radius:6px;
+        border:1px solid #2118d0;
+        display:inline-block;
+        cursor:pointer;
+        color:#ffffff;
+        font-family:Arial;
+        font-size:15px;
+        font-weight:bold;
+        padding:6px 24px;
+        text-decoration:none;
+        text-shadow:0px 1px 0px #810e05;
+    }
+    .button-blue:hover {
+        background:linear-gradient(to bottom, #271fc6 5%, #379bf2 100%);
+        background-color:#131388;
     }
     .big-bold {
         font-size: 1.2rem;
@@ -231,5 +313,10 @@
     }
     .separator {
         margin: 0 0.5rem;
+    }
+    .warn {
+        color: red;
+        font-weight: italic;
+        margin-top: 0.8rem;
     }
 </style>
