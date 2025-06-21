@@ -19,6 +19,7 @@ If you would like to compare entries so the same layerName - AssetName cannot be
 Uncomment lines 138 - 141.
 Comment lines 142 - 145
 ```
+Remember to Start the logger, using the "StartLogging" button.  
 Click the button at the bottom "Export Log to CSV" to download a CSV file of the shown data table.
 
 ## Requirements
