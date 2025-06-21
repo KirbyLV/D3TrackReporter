@@ -2,6 +2,11 @@
     <div class="logger-section">
         <h2>Played Asset Log</h2>
         <div class="assets-header">Assets will appear below as they are played</div>
+        <div style="margin: 1em 0;">
+            <button @click="isLogging = !isLogging">
+                {{  isLogging ? 'Stop Logging' : 'Start Logging' }}
+            </button>
+        </div>
         <details open style="margin-top: 20px;">
             <summary style="cursor: pointer; font-weight: bold;">Played Asset Table <span class="notation">(click to collapse)</span></summary>
             <table class="track-table">
@@ -124,11 +129,18 @@
         }));
     })
 
+    const isLogging = ref(false);
     const playLog = ref([]);
     watch(layerReported, (newEntries) => {
+        if (!isLogging.value) return; //Check to see if logging is enabled
         newEntries.forEach(entry => {
             const alreadyLogged = playLog.value.some(log => log.layer === entry.layer && log.path === entry.path);
-            if (!alreadyLogged && entry.path !== '(No path)') {
+            // // Use the following if you want to prevent logging entries with the same layer/path combination
+            // if (!alreadyLogged && entry.path !== '(No path)') {
+            //     playLog.value.push({ ...entry, timestamp: new Date().toISOString() });
+            // }
+            // Use the following if you want to log every entry, even duplicates
+            if (entry.path !== '(No path)') {
                 playLog.value.push({ ...entry, timestamp: new Date().toISOString() });
             }
         })

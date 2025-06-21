@@ -12,7 +12,13 @@ In /src/App.vue, on line 7, change the fallback IP to the IP address of the D3 D
 From the "D3TrackReporter" folder, run 'npm run dev'
 
 ## Play Logger
-Under the tab "Play Logger", there is an played asset log, that dynamically builds as layers are played. Currently, this compares entries so the same layerName - AssetName cannot be added to the list twice. This results in a list of assets that have been played, along with a timestamp for the first time they are played.  
+Under the tab "Play Logger", there is an played asset log, that dynamically builds as layers are played.  
+Currently, this log tracks all assets and layers and lists a timestamp for when they begin playing, even if the same layer-asset combination is played multiple times.  
+If you would like to compare entries so the same layerName - AssetName cannot be added to the list twice, you must alter the PlayLogger.vue file:  
+```
+Uncomment lines 138 - 141.
+Comment lines 142 - 145
+```
 Click the button at the bottom "Export Log to CSV" to download a CSV file of the shown data table.
 
 ## Requirements
