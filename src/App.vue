@@ -1,7 +1,7 @@
 <script setup>
 import { LiveUpdateOverlay, useLiveUpdate } from '@disguise-one/vue-liveupdate'
-import CurrentVideoAssets from './components/CurrentVideoAssets.vue'
-import TrackDetail from './components/TrackDetail.vue'
+// import CurrentVideoAssets from './components/CurrentVideoAssets.vue'
+// import TrackDetail from './components/TrackDetail.vue'
 
 // Extract the director endpoint from the URL query parameters
 const urlParams = new URLSearchParams(window.location.search)
@@ -13,17 +13,25 @@ const liveUpdate = useLiveUpdate(directorEndpoint)
 
 <template>
   <div class="app">
-    <h1>CT Disguise Monitoring</h1>
-
-    <CurrentVideoAssets :liveUpdate="liveUpdate" />
-
-    <TrackDetail :liveUpdate="liveUpdate" />
-
-    <LiveUpdateOverlay :liveUpdate="liveUpdate" />
-
-    <a href="https://ctus.com" target="_blank">
-      <img src="./assets/ctlogo.png" class="logo" alt="CT logo" />
-    </a>
+    <header>
+      <h1>CT Disguise Monitoring</h1>
+      <nav>
+        <router-link to="/track-detail">Track Details</router-link> |
+        <router-link to="/current-video-assets">Current Video Assets</router-link> |
+        <router-link to="/play-logger">Play Logger</router-link>
+      </nav>
+    </header>
+    <main>
+      <router-view v-slot="{ Component }">
+        <component :is="Component" :liveUpdate="liveUpdate" />
+      </router-view>
+      <LiveUpdateOverlay :liveUpdate="liveUpdate" />
+    </main>
+    <footer>
+      <a href="https://ctus.com" target="_blank">
+        <img src="./assets/ctlogo.png" class="logo" alt="CT logo" />
+      </a>
+    </footer>
   </div>
 </template>
 
