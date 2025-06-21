@@ -221,7 +221,7 @@ import { useLiveUpdateStore } from '../stores/liveUpdateStore';
     // Checking playhead position from global store against track start and end times
     function isActiveRow(row) {
         const playhead = store.currentPlayhead
-        return playhead >= row.startTimeSeconds && playhead <= row.endTimeSeconds;
+        return playhead >= row.startTimeSeconds && playhead < row.endTimeSeconds;
     }
 </script>
 
