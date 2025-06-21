@@ -27,7 +27,7 @@ const liveUpdate = useLiveUpdate(directorEndpoint)
       <router-view v-slot="{ Component }">
         <component :is="Component" :liveUpdate="liveUpdate" />
       </router-view>
-      <LiveUpdateOverlay :liveUpdate="liveUpdate" />
+      <LiveUpdateOverlay class="overlay-ui" :liveUpdate="liveUpdate" />
     </main>
     <footer>
       <a href="https://ctus.com" target="_blank">
@@ -79,5 +79,8 @@ const liveUpdate = useLiveUpdate(directorEndpoint)
   max-width: 800px;
   margin: 0 auto;
   padding: 1rem;
+}
+.overlay-ui {
+  color: #000;
 }
 </style>
