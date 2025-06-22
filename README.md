@@ -58,3 +58,8 @@ Click the button at the bottom "Export Log to CSV" to download a CSV file of the
 -node.js + npm  
 -This folder should contain all other requirements  
 -navigate to the folder for D3TrackReporter and run `npm install` to install vite
+
+## Building and serving
+The configurations have been updated to build this project and serve it locally.  
+To build, run `npm run build`. 
+To run this as a local server, cd to the dist directory and run 1npx serve -s`
