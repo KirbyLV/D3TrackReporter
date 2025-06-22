@@ -14,9 +14,19 @@ export const useLiveUpdateStore = defineStore('liveUpdate', () => {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     })
 
+    const ipAddress = ref(0)
+
+    function updateIP(newValue) {
+        ipAddress.value = newValue
+    }
+
     return {
         currentPlayhead,
         formattedPlayhead,
-        updatePlayhead
+        ipAddress,
+        updatePlayhead,
+        updateIP
     }
+    
 })
+
