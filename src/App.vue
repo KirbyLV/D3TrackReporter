@@ -1,5 +1,5 @@
 <script setup>
-import { LiveUpdateOverlay, useLiveUpdate } from '@disguise-one/vue-liveupdate'
+import { useLiveUpdate } from '@disguise-one/vue-liveupdate'
 import CurrentPlayhead from './components/CurrentPlayhead.vue'
 
 // Extract the director endpoint from the URL query parameters
@@ -27,6 +27,7 @@ const liveUpdate = useLiveUpdate(directorEndpoint)
       <router-view v-slot="{ Component }">
         <component :is="Component" :liveUpdate="liveUpdate" />
       </router-view>
+      <!-- Overlay component for lost connection -->
       <LiveUpdateOverlay class="overlay-ui" :liveUpdate="liveUpdate" />
     </main>
     <footer>
