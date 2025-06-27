@@ -23,7 +23,8 @@ Select which view you want to be in from the top header bar in yellow.
 This pop-up overlay only appears if the app cannot reach the D3 server. Either the network information is wrong, or the D3 session is not running.  
 Type in the IP adrees AND port and click reconnect.  Defualt port is 80, so an example connection point would be 10.10.22.101:80.
 Ensure you can ping your servers and your network is working.  
-The connection status is also reported at the bottom of the screen.
+The connection status is also reported at the bottom of the screen.  
+__NOTE:__ be sure to specify the port as well. port :80 is default.
 
 ### Current Video Assets 
 ![Screenshot 2025-06-21 at 12 21 26 PM](https://github.com/user-attachments/assets/d5143c91-ea08-4371-a2e4-0928ff4f8864)  
