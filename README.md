@@ -7,7 +7,7 @@ This runs a web server with a websocket connection to a Disguise director and re
 This is designed to run on a separate system with a network connection to the D3 Director
 
 ## To Use
-In /src/App.vue, on line 7, change the fallback IP to the IP address of the D3 Director  
+~~In /src/App.vue, on line 7, change the fallback IP to the IP address of the D3 Director~~  
 For the first time, be sure to run `npm install` within the project folder to install dependencies  
 
 From the "D3TrackReporter" folder, run 'npm run dev'
@@ -16,6 +16,14 @@ From the "D3TrackReporter" folder, run 'npm run dev'
 Only the currently active transport controller / the currently viewed timeline is reported. This hs not yet been tested with multi-transport.  
 In each view, the current playhead position will be at the top in `mm:ss`  
 Select which view you want to be in from the top header bar in yellow.
+
+### IP Address & Disconnected Window
+<img width="409" alt="Screenshot 2025-06-22 at 4 36 43 PM" src="https://github.com/user-attachments/assets/f0ee9544-b6f6-4d09-ae43-7d829011463e" />  
+
+This pop-up overlay only appears if the app cannot reach the D3 server. Either the network information is wrong, or the D3 session is not running.  
+Type in the IP adrees AND port and click reconnect.  Defualt port is 80, so an example connection point would be 10.10.22.101:80.
+Ensure you can ping your servers and your network is working.  
+The connection status is also reported at the bottom of the screen.
 
 ### Current Video Assets 
 ![Screenshot 2025-06-21 at 12 21 26 PM](https://github.com/user-attachments/assets/d5143c91-ea08-4371-a2e4-0928ff4f8864)  
@@ -50,3 +58,8 @@ Click the button at the bottom "Export Log to CSV" to download a CSV file of the
 -node.js + npm  
 -This folder should contain all other requirements  
 -navigate to the folder for D3TrackReporter and run `npm install` to install vite
+
+## Building and serving
+The configurations have been updated to build this project and serve it locally.  
+To build, run `npm run build`. 
+To run this as a local server, cd to the dist directory and run `npx serve -s`
