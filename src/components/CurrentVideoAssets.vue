@@ -3,12 +3,24 @@
         <h2>Local Transport Manager</h2>
         <h3>Running Video assets</h3>
         <div class="assets-header">Active Layers playing: {{ activeLayerCount }}</div>
+        
+        <!-- Debug overlay component -->
+        <DebugOverlay 
+            :liveUpdate="liveUpdate" 
+            :showDebug="showDebug"
+            :additionalData="{ layerCount: activeLayerCount }"
+        >
+            <template #additional-info>
+                Layer Count: {{ activeLayerCount }}<br>
+            </template>
+        </DebugOverlay>
+        
         <div class="assets-list">
             <ul>
                 <li v-for="item in layerReported" :key="item.layer">
                     <span class="layer-name">{{ item.layer }}</span>
                     <span class="separator">:</span>
-                    <span class="path-name">{{ item.path }}</span>
+                    <span class="path-name">{{ item.paths.join(', ') }}</span>
                 </li>
             </ul>
         </div>
@@ -17,6 +29,8 @@
 
 <script setup>
     import { computed, ref, watch } from 'vue';
+    import DebugOverlay from './DebugOverlay.vue';
+    
     const props = defineProps({
         liveUpdate: {
             type: Object,
@@ -24,99 +38,72 @@
         }
     })
 
-    //Dynamically get a list of active layers
-    const { activeLayers } = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', { activeLayers: 'object.player.activeLayers'})
-    
-    //count layers
-    const activeLayerCount = computed(() => {
-        return Array.isArray(activeLayers.value) ? activeLayers.value.length : 0
+    // Debug state
+    const showDebug = ref(true);
+
+    // Get active layers count and basic info using autoSubscribe
+    const activeLayers = props.liveUpdate.autoSubscribe('GuiSystem.currentTransportManager', ['object.player.activeLayers']);
+
+    // Subscribe to all sequence.keys for all layers using subscribe (complex Python expression)
+    const { allLayerSequenceKeys } = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', {
+        allLayerSequenceKeys: '[{"layerIndex": i, "layerName": l.name, "sequenceKeys": l.fields[10].sequence.keys} for i, l in enumerate(object.player.activeLayers)]'
     });
 
-    //Dynamically get a list of assets
-    const layerData = ref({})
+    // Watch for changes to log data
+    watch(allLayerSequenceKeys, (newValue) => {
+        console.log('allLayerSequenceKeys data:', newValue);
+    });
 
-    //Watch for layer count changes and subscribe to the active layers
-    watch(
-        () => activeLayerCount.value,
-        (count) => {
-            if (!count) return;
+    // Process the data structure
+    const activeLayerCount = computed(() => {
+        // Try multiple ways to access the active layers data
+        const layersData = activeLayers.player_activeLayers?.value || 
+                          activeLayers.player_activeLayers || 
+                          activeLayers.activeLayers?.value ||
+                          activeLayers.activeLayers;
+        
+        console.log('activeLayers object:', activeLayers);
+        console.log('layersData:', layersData);
+        console.log('layersData type:', typeof layersData);
+        console.log('isArray:', Array.isArray(layersData));
+        
+        return Array.isArray(layersData) ? layersData.length : 0;
+    });
 
-            const layerSubscriptions = {};
-            for (let i=0; i < count; i++) {
-                layerSubscriptions[`layer${i}`] = `object.player.activeLayers[${i}].name`;
+    const layerReported = computed(() => {
+        if (!Array.isArray(allLayerSequenceKeys.value)) return [];
+
+        return allLayerSequenceKeys.value.map((layerData) => {
+            let paths = [];
+            
+            // Extract video paths from sequence.keys data for this layer
+            if (layerData?.sequenceKeys && Array.isArray(layerData.sequenceKeys)) {
+                // Iterate through all keys in the sequence using for loop
+                for (let i = 0; i < layerData.sequenceKeys.length; i++) {
+                    const key = layerData.sequenceKeys[i];
+                    if (key?.r?.path) {
+                        const fullPath = key.r.path;
+                        const pathNoTail = fullPath.replace(/\.apx$/, '');
+                        const cleanPath = pathNoTail.replace(/^objects\/videoclip\//, '');
+                        paths.push(cleanPath);
+                    }
+                }
             }
 
-            layerData.value = props.liveUpdate.subscribe(
-                'GuiSystem.currentTransportManager',
-                layerSubscriptions
-            );
-        },
-        { immediate: true }
-    )
-
-    const layerNames = computed(() => {
-        if (!layerData.value) return [];
-        return Object.entries(layerData.value).map(([key, rawValue]) => ({
-            id: key,
-            name: typeof rawValue === 'string' && rawValue.length > 0 ? rawValue : '(Unnamed)',
-        }))
-    })
-
-    const videoAssetData = ref({});
-
-    watch(
-        () => activeLayerCount.value,
-        (count) => {
-            if (!count) return;
-
-            const assetSubscriptions = {};
-            for (let i = 0; i < count; i++) {
-                assetSubscriptions[`asset${i}`] = `object.player.activeLayers[${i}].fields[10].sequence.keys`
-            }
-
-            videoAssetData.value = props.liveUpdate.subscribe(
-                'GuiSystem.currentTransportManager',
-                assetSubscriptions
-            );
-        },
-        { immediate: true }
-    )
-
-    const videoAssetList = computed(() => {
-        if (!videoAssetData.value) return [];
-
-        return Object.entries(videoAssetData.value).map(([key, refValue]) => {
-            const raw = refValue?.value ?? refValue;
-
-            let path = '(No path)';
-            if (Array.isArray(raw) && raw.length > 0) {
-                const fullPath = raw[0]?.r?.path ?? '';
-                const pathNoTail = fullPath.replace(/\.apx$/, '');
-                path = pathNoTail.replace(/^objects\/videoclip\//, '');
+            // Better layer name handling
+            let layerName = 'Unknown Layer';
+            if (layerData?.layerName && layerData.layerName !== '') {
+                layerName = layerData.layerName;
+            } else if (layerData?.layerIndex !== undefined) {
+                layerName = `Layer ${layerData.layerIndex}`;
             }
 
             return {
-                id: key,
-                path
-            }
-        })
-    })
-
-    const layerReported = computed(() => {
-        return layerNames.value.map((layer, i) => ({
-            layer: layer.name,
-            path: videoAssetList.value[i]?.path || '(No path)',
-        }));
-    })
-
-    // console.log('videoAssetData snapshot:', videoAssetData)
-
-    /*
-    <!-- The raw subscription value for the video file names in a specific layer, For debugging -->
-    const { videoAsset } = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', { videoAsset: 'object.player.activeLayers[0].fields[10].sequence.keys'})
-
-    console.log('videoAsset.value:', videoAsset.value)
-    */
+                layer: layerName,
+                paths: paths.length > 0 ? paths : ['(No path)']
+            };
+        });
+    });
 </script>
 
 <style scoped>
@@ -125,6 +112,7 @@
         padding: 1rem;
         border: 1px solid #ccc;
         border-radius: 4px;
+        position: relative;
     }
     .assets-list {
         margin-top: 1rem;
