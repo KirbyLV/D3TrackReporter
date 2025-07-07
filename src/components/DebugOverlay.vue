@@ -21,7 +21,7 @@ const props = defineProps({
     },
     showDebug: {
         type: Boolean,
-        default: true
+        default: false
     },
     additionalData: {
         type: Object,

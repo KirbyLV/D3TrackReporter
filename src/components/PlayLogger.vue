@@ -7,7 +7,7 @@
         <!-- Debug overlay component -->
         <DebugOverlay 
             :liveUpdate="liveUpdate" 
-            :showDebug="true"
+            :showDebug="false"
             :additionalData="{ layerCount: activeLayerCount, isLogging, logCount: playLog.length }"
         >
             <template #additional-info>

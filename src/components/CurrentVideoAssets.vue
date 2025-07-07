@@ -39,7 +39,7 @@
     })
 
     // Debug state
-    const showDebug = ref(true);
+    const showDebug = ref(false);
 
     // Get active layers count and basic info using autoSubscribe
     const activeLayers = props.liveUpdate.autoSubscribe('GuiSystem.currentTransportManager', ['object.player.activeLayers']);
@@ -49,11 +49,6 @@
         allLayerSequenceKeys: '[{"layerIndex": i, "layerName": l.name, "sequenceKeys": l.fields[10].sequence.keys} for i, l in enumerate(object.player.activeLayers)]'
     });
 
-    // Watch for changes to log data
-    watch(allLayerSequenceKeys, (newValue) => {
-        console.log('allLayerSequenceKeys data:', newValue);
-    });
-
     // Process the data structure
     const activeLayerCount = computed(() => {
         // Try multiple ways to access the active layers data
@@ -61,11 +56,6 @@
                           activeLayers.player_activeLayers || 
                           activeLayers.activeLayers?.value ||
                           activeLayers.activeLayers;
-        
-        console.log('activeLayers object:', activeLayers);
-        console.log('layersData:', layersData);
-        console.log('layersData type:', typeof layersData);
-        console.log('isArray:', Array.isArray(layersData));
         
         return Array.isArray(layersData) ? layersData.length : 0;
     });

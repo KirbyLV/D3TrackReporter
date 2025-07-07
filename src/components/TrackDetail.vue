@@ -7,7 +7,7 @@
         <!-- Debug overlay component -->
         <DebugOverlay 
             :liveUpdate="liveUpdate" 
-            :showDebug="true"
+            :showDebug="false"
             :additionalData="{ layerCount, currentTrackName: currentTrackName?.track_description?.value }"
         >
             <template #additional-info>
@@ -58,20 +58,9 @@ import DebugOverlay from './DebugOverlay.vue';
     // Get current track name using autoSubscribe
     const currentTrackName = props.liveUpdate.autoSubscribe('GuiSystem.currentTransportManager', ['object.track.description']);
 
-    // Debug the currentTrackName object
-    watch(() => currentTrackName.track_description, (newValue) => {
-        console.log('currentTrackName.track_description:', newValue);
-        console.log('currentTrackName.track_description.value:', newValue?.value);
-    });
-
     // Get all track layer data in a single subscription using Python list comprehension
     const { allTrackLayers } = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', {
         allTrackLayers: '[{"layerIndex": i, "name": l.name, "sequenceKeys": l.fields[10].sequence.keys, "tStart": l.tStart, "tEnd": l.tEnd} for i, l in enumerate(object.track.layers)]'
-    });
-
-    // Debug the data structure
-    watch(allTrackLayers, (newValue) => {
-        console.log('allTrackLayers data:', newValue);
     });
 
     // Count layers
