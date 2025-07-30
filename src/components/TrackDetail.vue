@@ -1,8 +1,21 @@
 <template>
     <div class="track-section">
         <h2>Track Details</h2>
-        <div class="big-bold">Current Track: {{ currentTrackName }}</div>
+        <div class="big-bold">Current Track: {{ currentTrackName?.track_description?.value || 'No Track' }}</div>
         <div class="big-bold">Layers present in timeline: {{ layerCount }}</div>
+        
+        <!-- Debug overlay component -->
+        <DebugOverlay 
+            :liveUpdate="liveUpdate" 
+            :showDebug="false"
+            :additionalData="{ layerCount, currentTrackName: currentTrackName?.track_description?.value }"
+        >
+            <template #additional-info>
+                Track: {{ currentTrackName?.track_description?.value || 'No Track' }}<br>
+                Layer Count: {{ layerCount }}<br>
+            </template>
+        </DebugOverlay>
+        
         <details open style="margin-top: 20px;">
             <summary style="cursor: pointer; font-weight: bold;">Layer & Asset Table <span class="notation">(click to collapse)</span></summary>
             <table class="track-table">
@@ -31,6 +44,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useLiveUpdateStore } from '../stores/liveUpdateStore';
+import DebugOverlay from './DebugOverlay.vue';
     // Access current playhead from global pinia variable
     const store = useLiveUpdateStore();
 
@@ -41,138 +55,17 @@ import { useLiveUpdateStore } from '../stores/liveUpdateStore';
         }
     });
 
-    //Get current track name
-    const { currentTrackName } = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', {
-        currentTrackName: 'object.track.description'
+    // Get current track name using autoSubscribe
+    const currentTrackName = props.liveUpdate.autoSubscribe('GuiSystem.currentTransportManager', ['object.track.description']);
+
+    // Get all track layer data in a single subscription using Python list comprehension
+    const { allTrackLayers } = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', {
+        allTrackLayers: '[{"layerIndex": i, "name": l.name, "sequenceKeys": l.fields[10].sequence.keys, "tStart": l.tStart, "tEnd": l.tEnd} for i, l in enumerate(object.track.layers)]'
     });
 
-    // Dynamically get a list of track layers
-    const { trackLayerArray } = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', {
-        trackLayerArray: 'object.track.layers'
-    });
-    //Count layers
+    // Count layers
     const layerCount = computed(() => {
-        return Array.isArray(trackLayerArray.value) ? trackLayerArray.value.length : 0;
-    });
-    // Dynamically get a list of track layers
-    const trackLayerData = ref({});
-
-    // Watch for layer count changes and subscribe to the track layers
-    watch(
-        () => layerCount.value,
-        (count) => {
-            if (!count) return;
-
-            const trackSubscriptions = {};
-            for (let i = 0; i < count; i++) {
-                trackSubscriptions[`trackLayer${i}`] = `object.track.layers[${i}].name`;
-            }
-
-            trackLayerData.value = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', trackSubscriptions);
-        },
-        { immediate: true }
-    )
-
-    // Extract track layer names from the data
-    const trackLayerNames = computed(() => {
-        if (!trackLayerData.value) return [];
-        return Object.entries(trackLayerData.value).map(([key, rawValue]) => ({
-            id: key,
-            name: typeof rawValue === 'string' && rawValue.length > 0 ? rawValue : '(Unnamed)',
-        }));
-    });
-
-    // Pull the asset paths for each layer
-    const layerVideoAssetData = ref({});
-    watch(
-        () => layerCount.value,
-        (count) => {
-            if (!count) return;
-            const layerSubscriptions = {};
-            for (let i = 0; i < count; i++) {
-                layerSubscriptions[`layerVideoAsset${i}`] = `object.track.layers[${i}].fields[10].sequence.keys`;
-            }
-            // console.log('Layer Video Asset Subscriptions:', layerSubscriptions);
-
-            layerVideoAssetData.value = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', layerSubscriptions);
-        },
-        { immediate: true }
-    );
-
-    //Clean the paths names and eliminate the 'objects/videoclip/' prefix
-    const allTrackVideoAssets = computed(() => {
-        if (!layerVideoAssetData.value) return [];
-
-        return Object.entries(layerVideoAssetData.value).map(([key, refValue]) => {
-            const raw = refValue?.value ?? refValue;
-
-            let assetPath = '(No Asset)';
-            if (Array.isArray(raw) && raw.length >0) {
-                const fullAssetPath = raw[0]?.r?.path ?? '';
-                const pathNoApxTail = fullAssetPath.replace(/\.apx$/, '');
-                assetPath = pathNoApxTail.replace(/^objects\/videoclip\//, '');
-            }
-
-            return {
-                id: key,
-                assetPath
-            }
-        })
-    });
-    
-    // Getting the track layer timing
-    const layerStartTimeData = ref({});
-    watch(
-        () => layerCount.value,
-        (count) => {
-            if (!count) return;
-            const timeSubscriptions = {};
-            for (let i = 0; i < count; i++) {
-                timeSubscriptions[`startTime${i}`] = `object.track.layers[${i}].tStart`;
-            }
-            // console.log('Layer Start Time Subscriptions:', layerStartSubscriptions);
-
-            layerStartTimeData.value = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', timeSubscriptions);
-        },
-        { immediate: true }
-    );
-    const allLayerStartTimes = computed(() => {
-        if (!layerStartTimeData.value) return [];
-
-        return Object.entries(layerStartTimeData.value).map(([key, refValue]) => {
-            const raw = refValue?.value ?? refValue;
-            return {
-                id: key,
-                startTime: typeof raw === 'number' ? raw.toFixed(2) : 0
-            }
-        });
-    });
-    //Getting track layer end times
-    const layerEndTimeData = ref({});
-    watch(
-        () => layerCount.value,
-        (count) => {
-            if (!count) return;
-            const endTimeSubscriptions = {};
-            for (let i = 0; i < count; i++) {
-                endTimeSubscriptions[`endTime${i}`] = `object.track.layers[${i}].tEnd`;
-            }
-            // console.log('Layer End Time Subscriptions:', endTimeSubscriptions);
-
-            layerEndTimeData.value = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', endTimeSubscriptions);
-        },
-        { immediate: true }
-    );
-    const allLayerEndTimes = computed(() => {
-        if (!layerEndTimeData.value) return [];
-
-        return Object.entries(layerEndTimeData.value).map(([key, refValue]) => {
-            const raw = refValue?.value ?? refValue;
-            return {
-                id: key,
-                endTime: typeof raw === 'number' ? raw.toFixed(2) : 0
-            }
-        });
+        return Array.isArray(allTrackLayers.value) ? allTrackLayers.value.length : 0;
     });
 
     function formatTime(seconds) {
@@ -183,21 +76,39 @@ import { useLiveUpdateStore } from '../stores/liveUpdateStore';
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
-    // Combine track layer names with their corresponding video assets
+    // Process all track data from the single subscription
     const allTracksReported = computed(() => {
-        return trackLayerNames.value.map((trackLayer, i) => ({
-            trackLayer: trackLayer.name,
-            videoAsset: allTrackVideoAssets.value[i]?.assetPath || '(No Asset)',
-            startTimeSeconds: Number(allLayerStartTimes.value[i]?.startTime) || 0,
-            startTime: formatTime(Number(allLayerStartTimes.value[i]?.startTime)) || '(No Time)',
-            endTimeSeconds: Number(allLayerEndTimes.value[i]?.endTime) || 0,
-            endTime: formatTime(Number(allLayerEndTimes.value[i]?.endTime)) || '(No Time)',
-        }))
-    })
+        if (!Array.isArray(allTrackLayers.value)) return [];
+
+        return allTrackLayers.value.map((layerData) => {
+            // Clean video asset path with proper null checks
+            let videoAsset = '(No Asset)';
+            if (layerData?.sequenceKeys && Array.isArray(layerData.sequenceKeys) && layerData.sequenceKeys.length > 0) {
+                const firstKey = layerData.sequenceKeys[0];
+                if (firstKey?.r?.path && typeof firstKey.r.path === 'string') {
+                    const pathNoApxTail = firstKey.r.path.replace(/\.apx$/, '');
+                    videoAsset = pathNoApxTail.replace(/^objects\/videoclip\//, '');
+                }
+            }
+
+            // Format times
+            const startTimeSeconds = Number(layerData?.tStart) || 0;
+            const endTimeSeconds = Number(layerData?.tEnd) || 0;
+
+            return {
+                trackLayer: layerData?.name || `(Unnamed Layer ${layerData?.layerIndex || 0})`,
+                videoAsset: videoAsset,
+                startTimeSeconds: startTimeSeconds,
+                startTime: formatTime(startTimeSeconds),
+                endTimeSeconds: endTimeSeconds,
+                endTime: formatTime(endTimeSeconds),
+            };
+        });
+    });
 
     const allTracksSorted = computed(() => {
-        return [...allTracksReported.value].sort((a, b) => a.startTimeSeconds - b.startTimeSeconds)
-        });
+        return [...allTracksReported.value].sort((a, b) => a.startTimeSeconds - b.startTimeSeconds);
+    });
 
     function exportTableToCSV() {
         const rows = [
@@ -207,7 +118,7 @@ import { useLiveUpdateStore } from '../stores/liveUpdateStore';
                 track.trackLayer,
                 track.videoAsset
             ])
-        ]
+        ];
 
         const csvContent = rows.map(e => e.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')).join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -220,7 +131,7 @@ import { useLiveUpdateStore } from '../stores/liveUpdateStore';
 
     // Checking playhead position from global store against track start and end times
     function isActiveRow(row) {
-        const playhead = store.currentPlayhead
+        const playhead = store.currentPlayhead;
         return playhead >= row.startTimeSeconds && playhead < row.endTimeSeconds;
     }
 </script>
@@ -231,6 +142,7 @@ import { useLiveUpdateStore } from '../stores/liveUpdateStore';
         padding: 1rem;
         border: 1px solid #ccc;
         border-radius: 4px;
+        position: relative;
     }
     .big-bold {
         font-size: 1.2rem;
