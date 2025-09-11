@@ -63,3 +63,6 @@ Click the button at the bottom "Export Log to CSV" to download a CSV file of the
 The configurations have been updated to build this project and serve it locally.  
 To build, run `npm run build`. 
 To run this as a local server, cd to the dist directory and run `npx serve -s`
+
+## Thanks
+A very special thank you to Peter Kirkup for helping to optimize this app and troubleshoot some challenges with larger projects. 
