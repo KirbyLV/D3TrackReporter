@@ -51,7 +51,7 @@ const connectionStatusClass = computed(() => {
         <router-link to="/current-video-assets">Current Video Assets</router-link> |
         <router-link to="/track-detail">Track Details</router-link> |
         <router-link to="/play-logger">Play Logger</router-link> |
-        <router-link to="/timeline-readout">Timeline Readout</router-link>
+        <router-link to="/timeline-readout">Timeline Control</router-link>
       </nav>
     </header>
     <div v-if="connectionStatus !== 'OPEN'" class="modal-overlay">
