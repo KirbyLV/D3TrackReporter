@@ -50,7 +50,8 @@ const connectionStatusClass = computed(() => {
       <nav class="nav-links">
         <router-link to="/current-video-assets">Current Video Assets</router-link> |
         <router-link to="/track-detail">Track Details</router-link> |
-        <router-link to="/play-logger">Play Logger</router-link>
+        <router-link to="/play-logger">Play Logger</router-link> |
+        <router-link to="/timeline-readout">Timeline Readout</router-link>
       </nav>
     </header>
     <div v-if="connectionStatus !== 'OPEN'" class="modal-overlay">
@@ -65,9 +66,15 @@ const connectionStatusClass = computed(() => {
     <CurrentPlayhead :liveUpdate="liveUpdate" />
     <!-- Routed content view -->
     <main>
-      <router-view v-slot="{ Component }">
-        <component :is="Component" :liveUpdate="liveUpdate" />
-      </router-view>
+      <router-view v-slot="{ Component, route }">
+        <component
+          :is="Component"
+          v-bind="{
+            ...(route.name !== 'TimelineReadout' ? { liveUpdate } : {})
+          }"
+  />
+</router-view>
+
       <!-- Overlay component for lost connection -->
       <!--<LiveUpdateOverlay class="overlay-ui" :liveUpdate="liveUpdate" />-->
     </main>

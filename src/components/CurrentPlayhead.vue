@@ -8,40 +8,65 @@
 </template>
 
 <script setup>
-import { computed, watchEffect } from 'vue';
-import { useLiveUpdateStore } from '../stores/liveUpdateStore';
-    const props = defineProps({
-        liveUpdate: {
-            type: Object,
-            required: true
-        }
-    });
-    // Subscribe to the current playhead position
-    const { currentPlayhead } = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', {
-        currentPlayhead: 'object.player.tRender'
-    })
+import { computed, onUnmounted, toRefs, watchEffect } from 'vue'
+import { useLiveUpdateStore } from '../stores/liveUpdateStore'
 
-    const store = useLiveUpdateStore()
+const props = defineProps({
+  liveUpdate: { type: Object, required: true }
+})
 
-    watchEffect(() => {
-        if (typeof currentPlayhead?.value === 'number') {
-            store.updatePlayhead(currentPlayhead.value)
-        }
-    })
+const store = useLiveUpdateStore()
 
-    // Helper function: seconds to mm:ss
-    function formatSecondsToTime(seconds) {
-        if (typeof seconds !== 'number' || isNaN(seconds)) return '00:00'
-        const mins = Math.floor(seconds / 60)
-        const secs = Math.floor(seconds % 60)
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-    }
+// ⚠️ DO NOT destructure without toRefs — you'll lose reactivity.
+const sub = props.liveUpdate.subscribe('GuiSystem.currentTransportManager', {
+  currentPlayhead: 'object.player.tRender'
+})
 
-    const formattedPlayhead = computed (() => {
-        const val = currentPlayhead?.value
-        return formatSecondsToTime(val)
-    })
+// If `subscribe` returns an object with reactive properties:
+const { currentPlayhead } = toRefs(sub) 
+// If your API actually returns a ref directly, you can skip toRefs:
+// const currentPlayhead = sub.currentPlayhead
+
+// If subscribe returns an unsubscribe function, keep it:
+let unsubscribe
+if (typeof sub === 'function') {
+  unsubscribe = sub
+}
+onUnmounted(() => {
+  if (typeof unsubscribe === 'function') unsubscribe()
+})
+
+// Normalize units (ms → s) if needed.
+const asSeconds = (val) => {
+  if (typeof val !== 'number' || Number.isNaN(val)) return 0
+  // If tRender is in milliseconds, divide by 1000. If it's already seconds, remove the division.
+  return val > 10000 ? val / 1000 : val
+}
+
+watchEffect(() => {
+  // Because we used toRefs, .value is reactive now.
+  const raw = currentPlayhead?.value
+  if (typeof raw === 'number') {
+    store.updatePlayhead(asSeconds(raw))
+    // For debugging:
+    // console.log('playhead -> store', asSeconds(raw))
+  }
+})
+
+// Helper: seconds to mm:ss
+function formatSecondsToTime(seconds) {
+  if (typeof seconds !== 'number' || isNaN(seconds)) return '00:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+}
+
+const formattedPlayhead = computed(() => {
+  const val = currentPlayhead?.value
+  return formatSecondsToTime(asSeconds(val))
+})
 </script>
+
 
 <style scoped>
     .playhead-section {
