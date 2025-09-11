@@ -45,17 +45,19 @@
     </div>
 
     <h2 class="transport">Sections</h2>
+    <div class="tag">Current playing highlight only works with currently viewed transport in Disguise</div>
   </section>
 
   <section class="buttons">
     <div class="cues">
         <div
             v-for="group in filteredAndSearched"
-            :key="`${group.transportUid}-${group.time}`"
+            :key="groupKey(group)"
             class="timeBtn"
-            :class="{ current: currentKeys.has(`${group.transportUid}-${group.time}`) }"
+            :class="{ current: isCurrent(group) }"
+            :ref="(el) => setGroupRef(el, group)"
             @click="gotoTime(group)"
-            :aria-current="currentKeys.has(`${group.transportUid}-${group.time}`) ? 'true' : 'false'"
+            :aria-current="isCurrent(group) ? 'true' : 'false'"
         >
         <div class="cont">
           <div class="top">
@@ -107,7 +109,7 @@
 
 <script setup>
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useLiveUpdateStore } from '../stores/liveUpdateStore'
 
 // ---- state
@@ -120,6 +122,8 @@ const search = ref('')
 const filtersOpen = ref(false)
 const selectedUid = ref(null)
 const filters = ref({ section: true, note: true, cue: true, tc: true, midi: true })
+const groupRefs = new Map()
+const groupKey = (g) => `${g.transportUid}::${g.time}`
 
 const filterDefs = [
   { key: 'section', label: 'Sections' },
@@ -128,14 +132,6 @@ const filterDefs = [
   { key: 'tc', label: 'TC' },
   { key: 'midi', label: 'MIDI' },
 ]
-
-/* watch(
-  () => currentPlayhead.value,
-  (v) => console.log('🔁 playhead changed to', v),
-  { immediate: true }
-) */
-
-
 
 // ---- configuration
 const envUrl = import.meta.env.VITE_DISGUISE_BASE_URL || ''
@@ -275,6 +271,38 @@ const filteredAndSearched = computed(() => {
 
   return dataByTime.value.filter(passes)
 })
+
+// called from the template’s :ref
+function setGroupRef(el, g) {
+  const k = groupKey(g)
+  if (el) groupRefs.set(k, el)
+  else groupRefs.delete(k)
+}
+
+// pick the latest “current” group (highest time) each time anything changes
+const latestCurrent = computed(() => {
+  let latest = null
+  for (const g of filteredAndSearched.value) {
+    if (isCurrent(g)) {
+      if (!latest || g.time > latest.time) latest = g
+    }
+  }
+  return latest
+})
+
+watch(
+  latestCurrent,
+  async (g) => {
+    if (!g) return
+    await nextTick() // ensure DOM is updated
+    const el = groupRefs.get(groupKey(g))
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  },
+  { immediate: true }
+)
+
 
 // times per transport (sorted), used to find the next boundary fast and safely
 const sectionsByTransport = computed(() => {
