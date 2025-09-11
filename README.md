@@ -42,6 +42,26 @@ The layer name, associated video asset, and a timestamp for when the event occur
 **NOTE:** This window must be in view in order for the log to be running. If you click over to Track Details or Current Assets, logging will stop and start fresh.  
 You can export the log to a CSV, or clear the log to start over.
 
+### Timeline Control
+<img src="https://github.com/user-attachments/assets/50e42c48-31e2-4654-8462-1af9f4ef9061" width="600" height="799" alt="Screenshot Timelinecontrol" />  
+
+This tool starts with the "Current Cue" window showing the name of the current section tag, the next section, the elapsed timelien time in the sectiomn, and the remaining time until the section break.  
+Next up is a list of the transport controllers that are active (if using multi-transport) and a list of all sections on the associated timelines.  
+Visible sections in the lsit can be filtered by selecting which transport contorller they are being played by. You can alos click on the "filter" icon to expose other filters. Sections can be filtered by Section breaks, notes, cue tags, TC tags, or MIDI tags.  
+The page will automatically scroll and reveal the highlighted sections that are being played on the currently active timeline. 
+
+Use the "Preferences" section at the top to decide on your interactivity:  
++ "Sticky Current Cue" forces the "Current Cue" box to be visible at the top of the page abve all other elements while scrolling.
++ "Enable Timeline Controls" allows the user to click on sections in the section list to jump to those sections on the timeline. It also reveals the transport controls present on the right side of the screen.  
+
+Note, the color of the "Remaining" time will change based on how much time is left. By default, it turns yellow at 5 seconds and red at 0. If youd like to change the color change times, alter the code in lines 483 - 487 of the TimelineReadout.vue file.
+```
+const remainingClass = computed(() => {
+  if (remainingTime.value <= 0.1) return 'danger'
+  if (remainingTime.value <= 5) return 'warning'
+  return 'normal'
+})
+```
 ## Editing the Play Logger
 Under the tab "Play Logger", there is an played asset log, that dynamically builds as layers are played.  
 Currently, this log tracks all assets and layers and lists a timestamp for when they begin playing, even if the same layer-asset combination is played multiple times.  
